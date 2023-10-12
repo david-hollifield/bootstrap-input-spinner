@@ -34,6 +34,14 @@
         }
     }
 
+    // the default StepCalculator handler
+    const StepCalculator = function(props, element) {
+        this.getStepValue = function(value, step) {
+            console.log(value, step);
+            return Math.round(value / step) * step + step;
+        }
+    }
+
     let triggerKeyPressed = false
     const originalVal = $.fn.val
     $.fn.val = function (value) {
@@ -76,6 +84,7 @@
             keyboardStepping: true, // set this to `false` to disallow the use of the up and down arrow keys to step
             locale: navigator.language, // the locale, per default detected automatically from the browser
             editor: I18nEditor, // the editor (parsing and rendering of the input)
+            stepCalculator: StepCalculator,
             template: // the template of the input
                 '<div class="input-group ${groupClass}">' +
                 '<button style="min-width: ${buttonsWidth}" class="btn btn-decrement ${buttonsClass} btn-minus" type="button">${decrementButton}</button>' +
@@ -107,6 +116,7 @@
                 $original[0]["bootstrap-input-spinner"] = true
                 $original.hide()
                 $original[0].inputSpinnerEditor = new props.editor(props, this)
+                $original[0].inputSpinnerStepCalculator = new props.stepCalculator(props, this)
 
                 var autoDelayHandler = null
                 var autoIntervalHandler = null
@@ -277,7 +287,7 @@
                 if (isNaN(value)) {
                     value = 0
                 }
-                setValue(Math.round(value / step) * step + step)
+                setValue($original[0].inputSpinnerStepCalculator.getStepValue(value, step))
                 dispatchEvent($original, "input")
             }
 
