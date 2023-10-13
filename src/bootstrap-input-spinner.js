@@ -283,19 +283,33 @@
                     value = 0
                 }
 
-                // Default calculation
+                // Default newValue calculation
                 let newValue = Math.round(value / step) * step + step;
 
                 // If "values" is defined, increment/decrement based on the values list
+                // and min/max values
                 if (values.length > 0) {
                     const currentIndex = values.indexOf(value);
-                    if (step >= 0) {
+                    if (currentIndex == -1) {
+                        if (max == null && step >= 0) {
+                            newValue = values[values.length - 1];
+                        }
+                        if (min == null && step < 0) {
+                            newValue = values[0];
+                        }
+                    } else if (step >= 0) {
                         if (currentIndex < values.length - 1) {
                             newValue = values[currentIndex + 1];
+                        } else {
+                            if (max == null) {
+                                newValue = values[values.length - 1];
+                            }
                         }
                     } else {
                         if (currentIndex > 0) {
                             newValue = values[currentIndex - 1];
+                        } else {
+                            newValue = values[0];
                         }
                     }
                 }
