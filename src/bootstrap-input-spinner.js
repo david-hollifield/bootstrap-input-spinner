@@ -288,14 +288,14 @@
 
                 // If "values" is defined, increment/decrement based on the values list
                 if (values.length > 0) {
-                    const currentIndex = this.values.indexOf(value);
+                    const currentIndex = values.indexOf(value);
                     if (step >= 0) {
-                        if (currentIndex < this.values.length - 1) {
-                            newValue = this.values[currentIndex + 1];
+                        if (currentIndex < values.length - 1) {
+                            newValue = values[currentIndex + 1];
                         }
                     } else {
                         if (currentIndex > 0) {
-                            newValue = this.values[currentIndex - 1];
+                            newValue = values[currentIndex - 1];
                         }
                     }
                 }
