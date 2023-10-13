@@ -4,7 +4,7 @@
  * License: MIT, see file 'LICENSE'
  */
 
-;(function ($) {
+; (function ($) {
     "use strict"
 
     // the default editor for parsing and rendering
@@ -31,14 +31,6 @@
                 useGrouping: digitGrouping
             })
             return numberFormat.format(number)
-        }
-    }
-
-    // the default StepCalculator handler
-    const StepCalculator = function(props, element) {
-        this.getStepValue = function(value, step) {
-            console.log(value, step);
-            return Math.round(value / step) * step + step;
         }
     }
 
@@ -84,7 +76,6 @@
             keyboardStepping: true, // set this to `false` to disallow the use of the up and down arrow keys to step
             locale: navigator.language, // the locale, per default detected automatically from the browser
             editor: I18nEditor, // the editor (parsing and rendering of the input)
-            stepCalculator: StepCalculator,
             template: // the template of the input
                 '<div class="input-group ${groupClass}">' +
                 '<button style="min-width: ${buttonsWidth}" class="btn btn-decrement ${buttonsClass} btn-minus" type="button">${decrementButton}</button>' +
@@ -116,7 +107,6 @@
                 $original[0]["bootstrap-input-spinner"] = true
                 $original.hide()
                 $original[0].inputSpinnerEditor = new props.editor(props, this)
-                $original[0].inputSpinnerStepCalculator = new props.stepCalculator(props, this)
 
                 var autoDelayHandler = null
                 var autoIntervalHandler = null
@@ -151,6 +141,11 @@
                     $inputGroup.find("input").after(suffixElement)
                 }
 
+                var values = [];
+                if ($original.attr("data-values")) {
+                    values = $original.attr("data-values").split(",").map(v => parseFloat(v.trim()));
+                }
+
                 $original[0].setValue = function (newValue) {
                     setValue(newValue)
                 }
@@ -162,7 +157,7 @@
                     updateAttributes()
                     setValue(value, true)
                 })
-                observer.observe($original[0], {attributes: true})
+                observer.observe($original[0], { attributes: true })
 
                 $original.after($inputGroup)
 
@@ -214,7 +209,7 @@
                     }
                 })
                 onPointerUp(document.body, function () {
-                    if(pointerState === true) {
+                    if (pointerState === true) {
                         resetTimer()
                         dispatchEvent($original, "change")
                         pointerState = false
@@ -261,7 +256,7 @@
                     setTimeout(function () {
                         let event
                         if (typeof (Event) === 'function') {
-                            event = new Event(type, {bubbles: true})
+                            event = new Event(type, { bubbles: true })
                         } else { // IE
                             event = document.createEvent('Event')
                             event.initEvent(type, true, true)
@@ -274,7 +269,7 @@
             function stepHandling(step) {
                 calcStep(step)
                 resetTimer()
-                if(props.autoInterval !== undefined) {
+                if (props.autoInterval !== undefined) {
                     autoDelayHandler = setTimeout(function () {
                         autoIntervalHandler = setInterval(function () {
                             calcStep(step)
@@ -287,7 +282,25 @@
                 if (isNaN(value)) {
                     value = 0
                 }
-                setValue($original[0].inputSpinnerStepCalculator.getStepValue(value, step))
+
+                // Default calculation
+                let newValue = Math.round(value / step) * step + step;
+
+                // If "values" is defined, increment/decrement based on the values list
+                if (values.length > 0) {
+                    const currentIndex = this.values.indexOf(value);
+                    if (step >= 0) {
+                        if (currentIndex < this.values.length - 1) {
+                            newValue = this.values[currentIndex + 1];
+                        }
+                    } else {
+                        if (currentIndex > 0) {
+                            newValue = this.values[currentIndex - 1];
+                        }
+                    }
+                }
+
+                setValue(newValue);
                 dispatchEvent($original, "input")
             }
 
@@ -373,7 +386,7 @@
                 e.preventDefault()
             }
             callback(e)
-        }, {passive: false})
+        }, { passive: false })
         element.addEventListener("keydown", function (e) {
             if ((e.keyCode === 32 || e.keyCode === 13) && !triggerKeyPressed) {
                 triggerKeyPressed = true
