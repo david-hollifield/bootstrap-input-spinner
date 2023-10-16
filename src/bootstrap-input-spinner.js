@@ -123,6 +123,7 @@
                 var min = null
                 var max = null
                 var step = null
+                var values = [];
 
                 updateAttributes()
 
@@ -139,11 +140,6 @@
                 if (suffix) {
                     const suffixElement = $('<span class="input-group-text">' + suffix + '</span>')
                     $inputGroup.find("input").after(suffixElement)
-                }
-
-                var values = [];
-                if ($original.attr("data-values")) {
-                    values = $original.attr("data-values").split(",").map(v => parseFloat(v.trim()));
                 }
 
                 $original[0].setValue = function (newValue) {
@@ -356,6 +352,9 @@
                 min = isNaN($original.prop("min")) || $original.prop("min") === "" ? -Infinity : parseFloat($original.prop("min"))
                 max = isNaN($original.prop("max")) || $original.prop("max") === "" ? Infinity : parseFloat($original.prop("max"))
                 step = parseFloat($original.prop("step")) || 1
+                if ($original.attr("data-values")) {
+                    values = $original.attr("data-values").split(",").map(v => parseFloat(v.trim()));
+                }
                 if ($original.attr("hidden")) {
                     $inputGroup.attr("hidden", $original.attr("hidden"))
                 } else {
