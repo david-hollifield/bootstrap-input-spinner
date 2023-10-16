@@ -286,14 +286,7 @@
                 // and min/max values
                 if (values.length > 0) {
                     const currentIndex = values.indexOf(value);
-                    if (currentIndex == -1) {
-                        if (max == null && step >= 0) {
-                            newValue = values[values.length - 1];
-                        }
-                        if (min == null && step < 0) {
-                            newValue = values[0];
-                        }
-                    } else if (step >= 0) {
+                    if (step >= 0) {
                         if (currentIndex < values.length - 1) {
                             newValue = values[currentIndex + 1];
                         } else {
@@ -305,7 +298,9 @@
                         if (currentIndex > 0) {
                             newValue = values[currentIndex - 1];
                         } else {
-                            newValue = values[0];
+                            if (min == null) {
+                                newValue = values[0];
+                            }
                         }
                     }
                 }
