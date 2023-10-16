@@ -287,7 +287,7 @@
                 if (values.length > 0) {
                     const currentIndex = values.indexOf(value);
                     if (step >= 0) {
-                        if (currentIndex < values.length - 1) {
+                        if (currentIndex != -1 && currentIndex < values.length - 1) {
                             newValue = values[currentIndex + 1];
                         } else {
                             if (max == null) {
