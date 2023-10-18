@@ -123,7 +123,7 @@
                 var min = null
                 var max = null
                 var step = null
-                var values = [];
+                var valueList = [];
 
                 updateAttributes()
 
@@ -226,6 +226,14 @@
                 } else {
                     newValue = parseFloat(newValue)
                     newValue = Math.min(Math.max(newValue, min), max)
+
+                    if (valueList.length) {
+                        // the new value must be in the list of valid values
+                        if (valueList.indexOf(newValue) == -1) {
+                            newValue = findClosestNumber(newValue, valueList);
+                        }
+                    }
+
                     $original[0].value = newValue
                     if (updateInput) {
                         $input[0].value = $original[0].inputSpinnerEditor.render(newValue)
@@ -282,24 +290,24 @@
                 // Default newValue calculation
                 let newValue = Math.round(value / step) * step + step;
 
-                // If "values" is defined, increment/decrement based on the values list
+                // If "values" is defined, increment/decrement based on the valueList
                 // and min/max values
-                if (values.length > 0) {
-                    const currentIndex = values.indexOf(value);
+                if (valueList.length > 0) {
+                    const currentIndex = valueList.indexOf(value);
                     if (step >= 0) {
-                        if (currentIndex != -1 && currentIndex < values.length - 1) {
-                            newValue = values[currentIndex + 1];
+                        if (currentIndex != -1 && currentIndex < valueList.length - 1) {
+                            newValue = valueList[currentIndex + 1];
                         } else {
                             if (max == null) {
-                                newValue = values[values.length - 1];
+                                newValue = valueList[valueList.length - 1];
                             }
                         }
                     } else {
                         if (currentIndex > 0) {
-                            newValue = values[currentIndex - 1];
+                            newValue = valueList[currentIndex - 1];
                         } else {
                             if (min == null) {
-                                newValue = values[0];
+                                newValue = valueList[0];
                             }
                         }
                     }
@@ -348,7 +356,7 @@
                 max = isNaN($original.prop("max")) || $original.prop("max") === "" ? Infinity : parseFloat($original.prop("max"))
                 step = parseFloat($original.prop("step")) || 1
                 if ($original.attr("data-values")) {
-                    values = $original.attr("data-values").split(",").map(v => parseFloat(v.trim()));
+                    valueList = $original.attr("data-values").split(",").map(v => parseFloat(v.trim()));
                 }
                 if ($original.attr("hidden")) {
                     $inputGroup.attr("hidden", $original.attr("hidden"))
@@ -362,6 +370,28 @@
                     }
                 }
             }
+
+            function findClosestNumber(targetNumber, numberList) {
+                if (numberList.length === 0) {
+                  return null; // Handle the case where the list is empty
+                }
+              
+                let closestNumber = numberList[0]; // Initialize with the first number in the list
+                let minDifference = Math.abs(targetNumber - closestNumber); // Initialize with the difference to the first number
+              
+                for (let i = 1; i < numberList.length; i++) {
+                  const currentNumber = numberList[i];
+                  const currentDifference = Math.abs(targetNumber - currentNumber);
+              
+                  if (currentDifference < minDifference) {
+                    // Update the closest number if the current number is closer
+                    closestNumber = currentNumber;
+                    minDifference = currentDifference;
+                  }
+                }
+              
+                return closestNumber;
+              }
         })
 
         return this
