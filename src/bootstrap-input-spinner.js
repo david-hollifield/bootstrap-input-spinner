@@ -355,8 +355,9 @@
                 min = isNaN($original.prop("min")) || $original.prop("min") === "" ? -Infinity : parseFloat($original.prop("min"))
                 max = isNaN($original.prop("max")) || $original.prop("max") === "" ? Infinity : parseFloat($original.prop("max"))
                 step = parseFloat($original.prop("step")) || 1
+                valueList = [];
                 if ($original.attr("data-values")) {
-                    valueList = $original.attr("data-values").split(",").map(v => parseFloat(v.trim()));
+                    valueList = $original.attr("data-values").split(",").map(v => parseFloat(v.trim())).filter(v => !isNaN(v));
                 }
                 if ($original.attr("hidden")) {
                     $inputGroup.attr("hidden", $original.attr("hidden"))
