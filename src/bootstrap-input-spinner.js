@@ -227,20 +227,30 @@
                     newValue = parseFloat(newValue)
                     newValue = Math.min(Math.max(newValue, min), max)
 
-                    if (valueList.length) {
-                        // the new value must be in the list of valid values
-                        if (valueList.indexOf(newValue) == -1) {
-                            newValue = findClosestNumber(newValue, valueList);
-                        }
-                    }
-
                     $original[0].value = newValue
                     if (updateInput) {
                         $input[0].value = $original[0].inputSpinnerEditor.render(newValue)
                     }
                     value = newValue
+
+                    if (valueList.length) {
+                        validateValue();
+                    }
                 }
             }
+
+            const validateValue = debounce(() => {
+                let newValue = $original[0].value;
+
+                // the new value must be in the list of valid values
+                if (valueList.indexOf(Number(newValue)) == -1) {
+                    newValue = findClosestNumber(value, valueList);
+
+                    $original[0].value = newValue
+                    $input[0].value = $original[0].inputSpinnerEditor.render(newValue)
+                    value = newValue
+                }
+            });
 
             function destroy() {
                 $original.prop("required", $input.prop("required"))
@@ -374,28 +384,39 @@
 
             function findClosestNumber(targetNumber, numberList) {
                 if (numberList.length === 0) {
-                  return null; // Handle the case where the list is empty
+                    return null; // Handle the case where the list is empty
                 }
-              
+
                 let closestNumber = numberList[0]; // Initialize with the first number in the list
                 let minDifference = Math.abs(targetNumber - closestNumber); // Initialize with the difference to the first number
-              
+
                 for (let i = 1; i < numberList.length; i++) {
-                  const currentNumber = numberList[i];
-                  const currentDifference = Math.abs(targetNumber - currentNumber);
-              
-                  if (currentDifference < minDifference) {
-                    // Update the closest number if the current number is closer
-                    closestNumber = currentNumber;
-                    minDifference = currentDifference;
-                  }
+                    const currentNumber = numberList[i];
+                    const currentDifference = Math.abs(targetNumber - currentNumber);
+
+                    if (currentDifference < minDifference) {
+                        // Update the closest number if the current number is closer
+                        closestNumber = currentNumber;
+                        minDifference = currentDifference;
+                    }
                 }
-              
+
                 return closestNumber;
-              }
+            }
         })
 
         return this
+    }
+
+
+    function debounce(func, timeout = 1000) {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                func.apply(this, args);
+            }, timeout);
+        };
     }
 
     function onPointerUp(element, callback) {
