@@ -163,8 +163,12 @@
                     let newValue = $input[0].value
                     const focusOut = event.type === "focusout"
                     newValue = $original[0].inputSpinnerEditor.parse(newValue)
-                    setValue(newValue, focusOut)
-                    dispatchEvent($original, event.type)
+                    if (valueList.length) {
+                        setClosestValue(newValue, focusOut, event.type);
+                    } else {
+                        setValue(newValue, focusOut)
+                        dispatchEvent($original, event.type)
+                    }
                     if (props.keyboardStepping && focusOut) { // stop stepping
                         resetTimer()
                     }
@@ -232,24 +236,19 @@
                         $input[0].value = $original[0].inputSpinnerEditor.render(newValue)
                     }
                     value = newValue
-
-                    if (valueList.length) {
-                        validateValue();
-                    }
                 }
             }
 
-            const validateValue = debounce(() => {
-                let newValue = $original[0].value;
-
-                // the new value must be in the list of valid values
-                if (valueList.indexOf(Number(newValue)) == -1) {
-                    newValue = findClosestNumber(value, valueList);
-
-                    $original[0].value = newValue
-                    $input[0].value = $original[0].inputSpinnerEditor.render(newValue)
-                    value = newValue
+            const setClosestValue = debounce((newValue, updateInput, eventType) => {
+                if (!isNaN(newValue) && newValue !== "") {
+                    // the new value must be in the list of valid values
+                    if (valueList.indexOf(Number(newValue)) == -1) {
+                        newValue = findClosestNumber(newValue, valueList);
+                    }
                 }
+
+                setValue(newValue, updateInput);
+                dispatchEvent($original, eventType)
             });
 
             function destroy() {
@@ -381,42 +380,43 @@
                     }
                 }
             }
-
-            function findClosestNumber(targetNumber, numberList) {
-                if (numberList.length === 0) {
-                    return null; // Handle the case where the list is empty
-                }
-
-                let closestNumber = numberList[0]; // Initialize with the first number in the list
-                let minDifference = Math.abs(targetNumber - closestNumber); // Initialize with the difference to the first number
-
-                for (let i = 1; i < numberList.length; i++) {
-                    const currentNumber = numberList[i];
-                    const currentDifference = Math.abs(targetNumber - currentNumber);
-
-                    if (currentDifference < minDifference) {
-                        // Update the closest number if the current number is closer
-                        closestNumber = currentNumber;
-                        minDifference = currentDifference;
-                    }
-                }
-
-                return closestNumber;
-            }
         })
 
         return this
     }
 
-
-    function debounce(func, timeout = 1000) {
-        let timer;
-        return (...args) => {
-            clearTimeout(timer);
-            timer = setTimeout(() => {
+    function debounce(func, delay = 1000) {
+        let timeoutId;
+        return function (...args) {
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+            timeoutId = setTimeout(() => {
                 func.apply(this, args);
-            }, timeout);
+            }, delay);
         };
+    }
+
+    function findClosestNumber(targetNumber, numberList) {
+        if (numberList.length === 0) {
+            return null; // Handle the case where the list is empty
+        }
+
+        let closestNumber = numberList[0]; // Initialize with the first number in the list
+        let minDifference = Math.abs(targetNumber - closestNumber); // Initialize with the difference to the first number
+
+        for (let i = 1; i < numberList.length; i++) {
+            const currentNumber = numberList[i];
+            const currentDifference = Math.abs(targetNumber - currentNumber);
+
+            if (currentDifference < minDifference) {
+                // Update the closest number if the current number is closer
+                closestNumber = currentNumber;
+                minDifference = currentDifference;
+            }
+        }
+
+        return closestNumber;
     }
 
     function onPointerUp(element, callback) {
